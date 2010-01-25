@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 An example of how to use wx or wxagg in an application with the new
 toolbar - comment out the setA_toolbar line for no toolbar
@@ -46,10 +47,15 @@ class CanvasFrame(wx.Frame):
         dlg.Destroy()
 
     def __init__(self):
-        wx.Frame.__init__(self,None,-1,
-                         'PyBrew',size=(550,350))
+        wx.Frame.__init__(self, None, -1, 'PyBrew', size=(550,350))
 
         self.SetBackgroundColour(wx.NamedColor("WHITE"))
+
+        try:
+            self.bc = BrewController()
+        except Exception as e:
+            wx.MessageBox(str(e), 'Fatal error')
+            sys.exit(1)
 
         self.menubar = wx.MenuBar()
 
@@ -61,27 +67,34 @@ class CanvasFrame(wx.Frame):
         
         self.SetMenuBar(self.menubar)
 
-        self.figure = Figure()
+        sizer = wx.BoxSizer(wx.VERTICAL)
 
+        self.figure = Figure()
         if not hasattr(self, 'subplot'):
             self.axes = self.figure.add_subplot(111)
 
         self.canvas = FigureCanvas(self, -1, self.figure)
+        sizer.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
+        
+        button_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttons = self.bc.VALVES.keys()
+        buttons.sort()
+        for k in buttons:
+            valve_button = wx.ToggleButton(self, -1, label = self.bc.VALVES[k], name = k)
+            valve_button.Bind(wx.EVT_TOGGLEBUTTON, self.OnValve)
+            button_sizer.Add(valve_button)
+        sizer.Add(button_sizer)
 
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.sizer.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
-        self.SetSizer(self.sizer)
+        self.SetSizer(sizer)
         self.Fit()
 
         self.axes.axis([0, 100, -1, 100])
 
-        try:
-            self.bc = BrewController()
-        except Exception as e:
-            wx.MessageBox(str(e), 'Fatal error')
-            sys.exit(1)
-            
         self.add_timer()
+
+    def OnValve(self, evt):
+        valve = evt.GetEventObject().GetName()
+        self.bc.set_valve_open(valve, evt.IsChecked())
 
     def OnQuit(self, event):
         sys.exit(0)

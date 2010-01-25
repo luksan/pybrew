@@ -1,90 +1,121 @@
+# -*- coding: utf-8 -*-
 import serial
 import time
 
+SERIAL_STATE_INIT = 1
+SERIAL_STATE_ACTIVE = 2
+SERIAL_STATE_ERROR = 3
+
+# Commands:
+# SV <ventilnummer> <1|0> ändra ventilläge
+# GT <tempnummer> läs temperatur
+# GV <ventilnummer> läs ventilläge
+# GR läser regulatorns börvärde
+# SR <temperatur> sätter regulatorns börvärde
+
 class BrewController():
-    sport = None
+    def __init__(self):
+        self.sport = None
+        
+        self.serial_state = SERIAL_STATE_INIT
+        self.ticker = 0
+        
+        self.read_temp1 = -255
+        self.has_read_temp1 = False
+        
+        self.set_temp1 = 0
+        self.do_set_temp1 = False
+        
+        self.send_queue = []
 
-    SERIAL_STATE_INIT = 1
-    SERIAL_STATE_ACTIVE = 2
-    SERIAL_STATE_ERROR = 3
+        self.last_command_ok = False
+        
+        self.VALVES = {
+            '0': 'Ventil 1',
+            '1': 'Ventil 2',
+            '2': 'Ventil 3',
+            '3': 'Ventil 4',
+            }
 
-    serial_state = SERIAL_STATE_INIT
-    ticker = 0
-
-    read_temp1 = -255
-    has_read_temp1 = False
-
-    set_temp1 = 0
-    do_set_temp1 = False
-
-    last_command_ok = False
-
-    def __init__(this):
         try:
-            this.sport = serial.Serial(3)
-            this.sport.timeout = 0.1
-        except:
+            self.sport = serial.Serial('/dev/ttyUSB0')
+            self.sport.timeout = 0.1
+        except Exception, e:
+            print e
             raise Exception('Failed to init COM4')
+            class A:
+                def readlines(self):
+                    return []
+            self.sport = A()
+            return
 
-    def _parse_serial(this, lines):
-        this.last_command_ok = False
+    def _parse_serial(self, lines):
+        self.last_command_ok = False
         
         if (len(lines) < 1):
             return
         if (lines[0].find("accepting commands") != -1):
-            this.serial_state = this.SERIAL_STATE_ACTIVE
+            self.serial_state = SERIAL_STATE_ACTIVE
             print 'Serial line active'
             return
-        if (this.serial_state != this.SERIAL_STATE_ACTIVE):
+        if (self.serial_state != SERIAL_STATE_ACTIVE):
             return
 
         for i in range(0, len(lines)):
             if (lines[0].find('GT') != -1):
                 try:
-                    this.read_temp1 = int(lines[1])
-                    this.has_read_temp1 = True
-                    this.last_command_ok = True
+                    self.read_temp1 = int(lines[1])
+                    self.has_read_temp1 = True
+                    self.last_command_ok = True
                 except:
-                    this.read_temp1 = -255
-                    this.has_read_temp1 = False
+                    self.read_temp1 = -255
+                    self.has_read_temp1 = False
             if (lines[0].find('SR') != -1):
                 try:
                     result = lines[1]
                     if (result.find('OK') != -1):
-                        this.last_command_ok = True
+                        self.last_command_ok = True
                 except:
                     pass
-                        
+
+    def send(self, line):
+        self.send_queue.append(line)
+
+    def set_valve_open(self, valve, open):
+        print "Setting", self.VALVES[valve], open
+        s = '0'
+        if open:
+            s = '1'
+        self.send("SV " + str(valve) + " " + s)
 
     def set_temp(this, temp):
-        this.set_temp1 = temp
-        this.do_set_temp1 = True
-
+        self.send("SR " + str(this.set_temp1))
+        
     def get_temp(this):
         return this.read_temp1
 
-    def isready(this):
-        if ((this.serial_state == this.SERIAL_STATE_ACTIVE) and
-            (this.has_read_temp1)):
+    def isready(self):
+        if ((self.serial_state == SERIAL_STATE_ACTIVE) and
+            (self.has_read_temp1)):
             return True
         else:
             return False
 
-    def run(this):      
-        lines = this.sport.readlines()
-        this._parse_serial(lines)
-        this.ticker += 1
+    def run(self):      
+        lines = self.sport.readlines()
+        self._parse_serial(lines)
+        self.ticker += 1
 
-        if (this.serial_state != this.SERIAL_STATE_ACTIVE):
+        if (self.serial_state != SERIAL_STATE_ACTIVE):
             return
 
-        if ((this.ticker % 2) == 0):
-            this.sport.write("GT 0")
+        if ((self.ticker % 2) == 0):
+            self.sport.write("GT 0")
 
-        if (((this.ticker+1) % 2) == 0):
-            if (this.do_set_temp1):
-                this.sport.write("SR " + str(this.set_temp1))
-                this.do_set_temp1 = False
+        if (((self.ticker+1) % 2) == 0):
+            for l in self.send_queue:
+                self.sport.write(l)
+            self.send_queue = []
 
 def main():
     bc = BrewController()
