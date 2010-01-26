@@ -17,6 +17,8 @@ class Pybrew(MainWindow):
         MainWindow.__init__(self)
 
         self.tempUpdateInterval = 1000 # update interval in milliseconds
+        
+        self.target_temp = 0
 
         try:
             self.bc = BrewController('/dev/ttyUSB0')
@@ -45,19 +47,22 @@ class Pybrew(MainWindow):
         
         self.tempXData = []
         self.tempYData = []
-        self.tempCurve.setData(range(100), range(100))
         
+        self.Thermo.setAlarmLevel(25)
+        self.Thermo.setAlarmColor(Qt.green)
+
         self.tempUpdateTimer = QTimer(self)
         self.connect(self.tempUpdateTimer, SIGNAL('timeout()'), self.tempUpdateEvent)
         self.tempUpdateTimer.start(self.tempUpdateInterval)
             
-    def setTargetTempEvent(self, event):
+    def setTargetTempEvent(self):
         temp = self.targetTempLineEdit.text()
-        print "set temp to", temp
-        self.bc.set_temp(temp)
+        self.set_target_temp(temp)
     
     def tempUpdateEvent(self):
         temp = self.bc.get_temp("0")
+        
+        self.Thermo.setValue(float(temp))
         if not self.tempXData:
             self.tempXData = [0]
         else:
@@ -65,7 +70,14 @@ class Pybrew(MainWindow):
         self.tempYData.append(int(temp))
         self.tempCurve.setData(self.tempXData, self.tempYData)
         self.tempQwtPlot.replot()
-        
+    
+    def set_target_temp(self, temp):
+        if int(temp) == self.target_temp:
+            return
+        temp = self.bc.set_temp(temp)
+        self.target_temp = temp
+        self.targetTempLineEdit.setText(str(temp))
+
     def valve_button_clicked(self, valve_id, button):
         self.bc.set_valve_open(valve_id, button.isChecked())
         is_open = self.bc.get_valve_open(valve_id)

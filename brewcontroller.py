@@ -41,6 +41,7 @@ class BrewController():
             class A:
                 def __init__(self):
                     self.s = "Fake controller ready\n"
+                    self.target_temp = "40\n"
                 def readlines(self):
                     return [self.read()]
                 def read(self):
@@ -50,10 +51,16 @@ class BrewController():
                         self.s = "32\n"
                     if s.startswith("GV"):
                         self.s = "0\n"
+                    if s == "GR\n":
+                        self.s = self.target_temp
+                    if self.s[-1] != "\n":
+                        self.s = self.s + "\n"
                     return s
                 def readline(self):
                     return self.read()
                 def write(self, s):
+                    if s.startswith("SR"):
+                        self.target_temp = s.split()[1]
                     self.s = s
             self.sport = A()
         
