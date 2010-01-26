@@ -19,7 +19,7 @@ class Pybrew(MainWindow):
         self.tempUpdateInterval = 1000 # update interval in milliseconds
 
         try:
-            self.bc = BrewController('/dev/ttyUSB0')
+            self.bc = BrewController(0)
         except Exception as e:
             QMessageBox.critical(None, "Fatal error", str(e))
             sys.exit(1)
