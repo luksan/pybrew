@@ -10,7 +10,7 @@ from PyQt4.Qwt5 import *
 
 from pybrewMainWindow import MainWindow
 
-from brewcontroller import BrewController
+from brewcontroller import BrewController, BrewControllerException
 
 class Pybrew(MainWindow):
     def __init__(self):
@@ -22,9 +22,11 @@ class Pybrew(MainWindow):
 
         try:
             self.bc = BrewController('/dev/ttyUSB0')
-        except Exception as e:
+        except BrewControllerException as e:
             QMessageBox.critical(None, "Fatal error", str(e))
             sys.exit(1)
+        
+        self.set_target_temp(self.bc.get_target_temp())
 
         buttons = self.bc.VALVES.keys()
         buttons.sort()
@@ -62,7 +64,13 @@ class Pybrew(MainWindow):
     def tempUpdateEvent(self):
         temp = self.bc.get_temp("0")
         
-        self.Thermo.setValue(float(temp))
+        try:
+            temp = float(temp)
+        except:
+            print "Float conversion error", temp
+            return
+        
+        self.Thermo.setValue(temp)
         if not self.tempXData:
             self.tempXData = [0]
         else:
@@ -72,7 +80,11 @@ class Pybrew(MainWindow):
         self.tempQwtPlot.replot()
     
     def set_target_temp(self, temp):
-        if int(temp) == self.target_temp:
+        try:
+            temp = int(temp)
+        except ValueError:
+            print temp, "is not a valid temperature."
+        if temp == self.target_temp:
             return
         temp = self.bc.set_temp(temp)
         self.target_temp = temp
