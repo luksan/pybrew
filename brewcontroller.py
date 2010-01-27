@@ -16,7 +16,39 @@ SERIAL_STATE_ERROR = 3
 class BrewControllerException(Exception):
     pass
 
-class BrewController():
+class FakeSerial:
+    def __init__(self):
+        self.s = "Fake controller ready\n"
+        self.target_temp = "40\n"
+        self.lines = []
+    def readlines(self):
+        time.sleep(1)
+        r = self.lines
+        self.lines = []
+        return r
+    def read(self):
+        try:
+            s = self.lines.pop(0)
+        except:
+            return ""
+        return s
+    def readline(self):
+        return self.read()
+    def write(self, s):
+        self.lines.append(s)
+        if s.startswith("SR"):
+            self.target_temp = s.split()[1]
+        if s == "GT 0\n":
+            self.lines.append("32\n")
+        elif s.startswith("GV"):
+            self.lines.append("0\n")
+        elif s == "GR\n":
+            self.lines.append(str(self.target_temp) + '\n')
+        else:
+            self.lines.append("OK\n")
+        self.s = s
+
+class BrewController:
     def __init__(self, port_name = None):
         self.sport = None
         self.serial_state = SERIAL_STATE_INIT
@@ -30,44 +62,14 @@ class BrewController():
         
         if port_name != None:
             self.open_port(port_name)
-        
+
     def open_port(self, port_name):
         try:
             self.sport = serial.Serial(port_name, timeout = 0.5)
         except Exception, e:
             print e
             #raise BrewControllerException('Failed to init COM4')
-            class A:
-                def __init__(self):
-                    self.s = "Fake controller ready\n"
-                    self.target_temp = "40\n"
-                    self.lines = []
-                def readlines(self):
-                    r = self.lines
-                    self.lines = []
-                    return r
-                def read(self):
-                    try:
-                        s = self.lines.pop(0)
-                    except:
-                        return ""
-                    return s
-                def readline(self):
-                    return self.read()
-                def write(self, s):
-                    self.lines.append(s)
-                    if s.startswith("SR"):
-                        self.target_temp = s.split()[1]
-                    if s == "GT 0\n":
-                        self.lines.append("32\n")
-                    elif s.startswith("GV"):
-                        self.lines.append("0\n")
-                    elif s == "GR\n":
-                        self.lines.append(str(self.target_temp) + '\n')
-                    else:
-                        self.lines.append("OK\n")
-                    self.s = s
-            self.sport = A()
+            self.sport = FakeSerial()
         
         # Flush initialization lines
         time.sleep(1)
