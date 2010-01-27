@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'pybrewMainWindow.ui'
 #
-# Created: Tue Jan 26 11:35:26 2010
+# Created: Wed Jan 27 11:21:12 2010
 #      by: PyQt4 UI code generator 4.5.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -29,7 +29,8 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.targetTempLineEdit.sizePolicy().hasHeightForWidth())
         self.targetTempLineEdit.setSizePolicy(sizePolicy)
         self.targetTempLineEdit.setMinimumSize(QtCore.QSize(0, 0))
-        self.targetTempLineEdit.setMaximumSize(QtCore.QSize(131, 28))
+        self.targetTempLineEdit.setMaximumSize(QtCore.QSize(40, 28))
+        self.targetTempLineEdit.setMaxLength(2)
         self.targetTempLineEdit.setObjectName("targetTempLineEdit")
         self.horizontalLayout_2.addWidget(self.targetTempLineEdit)
         self.label_2 = QtGui.QLabel(self.centralwidget)
@@ -81,6 +82,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QObject.connect(self.toolBar, QtCore.SIGNAL("actionTriggered(QAction*)"), MainWindow.setTargetTempEvent)
+        QtCore.QObject.connect(self.targetTempLineEdit, QtCore.SIGNAL("editingFinished()"), MainWindow.setTargetTempEvent)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
