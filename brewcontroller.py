@@ -33,42 +33,70 @@ class BrewController():
         
     def open_port(self, port_name):
         try:
-            self.sport = serial.Serial(port_name)
-            self.sport.timeout = 0.2
+            self.sport = serial.Serial(port_name, timeout = 0.5)
         except Exception, e:
             print e
             #raise BrewControllerException('Failed to init COM4')
             class A:
                 def __init__(self):
                     self.s = "Fake controller ready\n"
+                    self.target_temp = "40\n"
+                    self.lines = []
                 def readlines(self):
-                    return [self.read()]
+                    r = self.lines
+                    self.lines = []
+                    return r
                 def read(self):
-                    s = self.s
-                    self.s = "OK\n"
-                    if s == "GT 0\n":
-                        self.s = "32\n"
-                    if s.startswith("GV"):
-                        self.s = "0\n"
+                    try:
+                        s = self.lines.pop(0)
+                    except:
+                        return ""
                     return s
                 def readline(self):
                     return self.read()
                 def write(self, s):
+                    self.lines.append(s)
+                    if s.startswith("SR"):
+                        self.target_temp = s.split()[1]
+                    if s == "GT 0\n":
+                        self.lines.append("32\n")
+                    elif s.startswith("GV"):
+                        self.lines.append("0\n")
+                    elif s == "GR\n":
+                        self.lines.append(str(self.target_temp) + '\n')
+                    else:
+                        self.lines.append("OK\n")
                     self.s = s
             self.sport = A()
         
         # Flush initialization lines
-        for l in self.sport.readlines():
-            print l
+        time.sleep(1)
+        while True:
+            l = self.sport.readline()
+            if not l:
+                break
 
     def __send(self, line):
         if line[-1] != '\n':
             line = line + '\n'
-        self.sport.write(line)
-        r = self.sport.readline()
-        if r != line:
-            raise BrewControllerException("Read error. Sent '"+line + "', received '" + r + "'")
-        result = self.sport.readline().strip()
+        try:
+            self.sport.write(line)
+            r = self.sport.readlines()
+        except OSError, e:
+            #FIXME stop all further communication attempts
+            print "Read/write failed:", e
+            return False
+
+        if len(r) != 2:
+            raise BrewControllerException("Didn't read 2 lines" + str(r))
+        line = line.strip()
+        
+        echo = r[0].strip()
+        result = r[1].strip()
+        if echo != line:
+            raise BrewControllerException("Read error. Sent '" + line + 
+                       "', received '" + result + "'")
+        print line,":", echo,":", result
         if result in ('NCK', 'NOK'):
             return False
         if result == 'OK':
@@ -102,8 +130,18 @@ class BrewController():
     def get_target_temp(self):
         """Read the target temperature from the controller."""
         r = self.__send("GR")
-        return int(r)
+        try:
+            return int(r)
+        except:
+            raise BrewControllerException("Target temp read failed." + str(r))
 
     def get_temp(self, sensor_id):
         """Read the actual temperature from sensor sensor_id."""
-        return self.__send("GT " + str(sensor_id))
+        r = self.__send("GT " + str(sensor_id))
+        if r == False or r == True:
+            raise BrewControllerException("Temp read failed." + str(r))
+        try:
+            r = float(r)
+        except:
+            raise BrewControllerException("Temp read failed." + str(r))
+        return r
