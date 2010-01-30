@@ -70,18 +70,18 @@ class TempPlot:
         self.qwt_plot.replot()
     
 class TargetTempProfileModel(QAbstractTableModel):
-    def __init__(self, headers, parent = None):
+    def __init__(self, parent = None):
         QAbstractTableModel.__init__(self, parent)
         
-        self.headerdata = headers
+        self.headerdata = ["Temp", "Time"]
         self.tempdata = []
     
-    def rowCount(self, parent):
+    def rowCount(self, parent = QModelIndex()):
         if not parent.isValid():
             return len(self.tempdata)
         return 0
     
-    def columnCount(self, parent):
+    def columnCount(self, parent = QModelIndex()):
         if not parent.isValid():
             return 2
         return 0
@@ -94,8 +94,14 @@ class TargetTempProfileModel(QAbstractTableModel):
             return QVariant(self.tempdata[index.row()][index.column()])
         return QVariant()
     
+    def getTemp(self, row):
+        return int(str(self.tempdata[row][0]))
+
+    def getTime(self, row):
+        return int(str(self.tempdata[row][1]))
+
     def setData(self, index, data, role = Qt.EditRole):
-        self.tempdata[index.row()][index.column()] = data.toPyObject()
+        self.tempdata[index.row()][index.column()] = int(str(data.toPyObject()))
         self.dataChanged.emit(index, index)
         return True
     
@@ -126,6 +132,8 @@ class Pybrew(MainWindow):
         self.tempUpdateInterval = 1000 # update interval in milliseconds
         
         self.target_temp = 0
+        self.target_temp_time = None # The time when the target temp was reached
+        self.target_profile_line = None # The current line in progress in the temp profile
 
         try:
             self.bc = BrewController()
@@ -158,7 +166,7 @@ class Pybrew(MainWindow):
 
         self.tempPlot = TempPlot(self.tempQwtPlot)
 
-        self.targetTempProfileModel = TargetTempProfileModel(["Temp", "Time"], parent = self)
+        self.targetTempProfileModel = TargetTempProfileModel(parent = self)
         self.tempProfileTableView.setModel(self.targetTempProfileModel)
         
         self.tempUpdateTimer = QTimer(self)
@@ -177,9 +185,26 @@ class Pybrew(MainWindow):
         print "Serial error:", msg
 
     def serialGetTempEvent(self, sensor, temp):
-        print "got temp", sensor, temp
+        #print "got temp", sensor, temp
         self.Thermo.setValue(temp)
         self.tempPlot.add_temp(temp)
+        if temp >= self.target_temp and self.target_profile_line != None:
+            self.check_temp_profile()
+
+    def check_temp_profile(self):
+        if self.target_temp_time == None:
+            self.target_temp_time = time.time()
+        # check if we have stayed at this temp long enough
+        ttime = self.targetTempProfileModel.getTime(self.target_profile_line)
+        if time.time() - self.target_temp_time >= ttime:
+            self.target_profile_line += 1
+            self.target_temp_time = None
+            if self.target_profile_line >= self.targetTempProfileModel.rowCount():
+                # The temp profile is complete. Turn off heating
+                self.runTempProfileButton.setChecked(False)
+                self.set_target_temp(20)
+            else:
+                self.set_target_temp(self.targetTempProfileModel.getTemp(self.target_profile_line))            
     
     def serialGetTargetTempEvent(self, temp):
         print "got target temp", repr(temp), "old", repr(self.target_temp)
@@ -211,7 +236,7 @@ class Pybrew(MainWindow):
 
     def newTargetTempEvent(self):
         row = self.tempProfileTableView.currentIndex().row()
-        self.targetTempProfileModel.insertRows(row)
+        self.targetTempProfileModel.insertRows(row + 1)
         self.tempProfileTableView.resizeRowsToContents()
 
     def setTargetTempEvent(self):
@@ -227,15 +252,23 @@ class Pybrew(MainWindow):
     def removeTargetTempEvent(self):
         self.targetTempProfileModel.removeRows(self.tempProfileTableView.currentIndex().row())
     
+    def runTempProfileToggledEvent(self, toggled):
+        if toggled:
+            self.target_profile_line = 0
+            self.set_target_temp(self.targetTempProfileModel.getTemp(0))
+        else:
+            self.target_profile_line = None            
+
     def tempUpdateEvent(self):
         self.bc.get_temp("0")
 
     def set_target_temp(self, temp):
+        print "Setting target temp to", temp
         try:
             temp = int(temp)
         except ValueError:
             print temp, "is not a valid temperature."
-            return
+            raise
         if temp == self.target_temp:
             return
         self.bc.set_target_temp(temp)

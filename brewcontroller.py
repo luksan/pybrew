@@ -22,7 +22,9 @@ class BrewControllerException(Exception):
 class FakeSerial:
     def __init__(self):
         self.s = "Fake controller ready\n"
-        self.target_temp = "40\n"
+        self.target_temp = 40
+        self.delta = 1
+        self.temp = 20
         self.lines = []
     def readlines(self):
         time.sleep(0.3)
@@ -40,9 +42,12 @@ class FakeSerial:
     def write(self, s):
         self.lines.append(s)
         if s.startswith("SR"):
-            self.target_temp = s.split()[1]
+            self.target_temp = int(s.split()[1])
+            self.delta = max((self.target_temp - self.temp)/3.0, 0.5)
         if s == "GT 0\n":
-            self.lines.append("32\n")
+            if self.temp < self.target_temp:
+                self.temp = int(self.temp + self.delta)
+            self.lines.append("%i\n" % self.temp)
         elif s.startswith("GV"):
             self.lines.append("0\n")
         elif s == "GR\n":
@@ -159,7 +164,7 @@ class BrewController(QThread):
         if echo != line:
             raise BrewControllerException("Read error. Sent '" + line + 
                        "', received '" + result + "'")
-        print line,":", echo,":", result
+        # print line,":", echo,":", result
         if result in ('NCK', 'NOK'):
             raise BrewControllerException("Command failed." + line + ", " + str(r))
         

@@ -65,6 +65,16 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="runTempProfileButton">
+          <property name="text">
+           <string>Run temp profile</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -354,10 +364,43 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>runTempProfileButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>targetTempLineEdit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>151</x>
+     <y>85</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>108</x>
+     <y>85</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>runTempProfileButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>runTempProfileToggledEvent(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>277</x>
+     <y>81</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>351</x>
+     <y>86</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>setTargetTempEvent()</slot>
   <slot>newTargetTempEvent()</slot>
   <slot>removeTargetTempEvent()</slot>
+  <slot>runTempProfileToggledEvent(bool)</slot>
  </slots>
 </ui>
