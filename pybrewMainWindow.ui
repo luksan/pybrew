@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>553</width>
+    <width>801</width>
     <height>495</height>
    </rect>
   </property>
@@ -14,107 +14,231 @@
    <string>pyBrew</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout_3">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Target temp</string>
-        </property>
-        <property name="buddy">
-         <cstring>targetTempLineEdit</cstring>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Target temp</string>
+          </property>
+          <property name="buddy">
+           <cstring>targetTempLineEdit</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="targetTempLineEdit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>28</height>
+           </size>
+          </property>
+          <property name="text">
+           <string notr="true"/>
+          </property>
+          <property name="maxLength">
+           <number>2</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>°C</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="runTempProfileButton">
+          <property name="text">
+           <string>Run temp profile</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QLineEdit" name="targetTempLineEdit">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>40</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="text">
-         <string notr="true"/>
-        </property>
-        <property name="maxLength">
-         <number>2</number>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QwtPlot" name="tempQwtPlot"/>
+        </item>
+        <item>
+         <widget class="QwtThermo" name="Thermo">
+          <property name="alarmEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="alarmLevel">
+           <double>45.000000000000000</double>
+          </property>
+          <property name="scalePosition">
+           <enum>QwtThermo::RightScale</enum>
+          </property>
+          <property name="fillColor">
+           <color>
+            <red>170</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </property>
+          <property name="maxValue">
+           <double>100.000000000000000</double>
+          </property>
+          <property name="minValue">
+           <double>0.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>23.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>°C</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
+       <layout class="QHBoxLayout" name="valveButtonLayout"/>
       </item>
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QwtPlot" name="tempQwtPlot"/>
-      </item>
-      <item>
-       <widget class="QwtThermo" name="Thermo">
-        <property name="alarmEnabled">
-         <bool>true</bool>
-        </property>
-        <property name="alarmLevel">
-         <double>45.000000000000000</double>
-        </property>
-        <property name="scalePosition">
-         <enum>QwtThermo::RightScale</enum>
-        </property>
-        <property name="fillColor">
-         <color>
-          <red>170</red>
-          <green>0</green>
-          <blue>0</blue>
-         </color>
-        </property>
-        <property name="maxValue">
-         <double>100.000000000000000</double>
-        </property>
-        <property name="minValue">
-         <double>0.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>23.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="valveButtonLayout"/>
+     <widget class="QGroupBox" name="groupBox">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>220</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="title">
+       <string>Temp profile</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QPushButton" name="newTempButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>New</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="removeTempButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Remove</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QTableView" name="tempProfileTableView">
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAsNeeded</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
+         </property>
+         <attribute name="horizontalHeaderDefaultSectionSize">
+          <number>80</number>
+         </attribute>
+         <attribute name="horizontalHeaderHighlightSections">
+          <bool>false</bool>
+         </attribute>
+         <attribute name="horizontalHeaderStretchLastSection">
+          <bool>true</bool>
+         </attribute>
+         <attribute name="verticalHeaderDefaultSectionSize">
+          <number>0</number>
+         </attribute>
+         <attribute name="verticalHeaderMinimumSectionSize">
+          <number>0</number>
+         </attribute>
+         <attribute name="verticalHeaderDefaultSectionSize">
+          <number>0</number>
+         </attribute>
+         <attribute name="horizontalHeaderStretchLastSection">
+          <bool>true</bool>
+         </attribute>
+         <attribute name="verticalHeaderMinimumSectionSize">
+          <number>0</number>
+         </attribute>
+         <attribute name="horizontalHeaderHighlightSections">
+          <bool>false</bool>
+         </attribute>
+         <attribute name="horizontalHeaderDefaultSectionSize">
+          <number>80</number>
+         </attribute>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -123,7 +247,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>553</width>
+     <width>801</width>
      <height>24</height>
     </rect>
    </property>
@@ -146,19 +270,22 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionSet_temp"/>
+   <addaction name="actionSave_temp_profile"/>
+   <addaction name="actionLoad_temp_profile"/>
   </widget>
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
    </property>
   </action>
-  <action name="actionSet_temp">
+  <action name="actionSave_temp_profile">
    <property name="text">
-    <string>Set temp</string>
+    <string>Save temp profile</string>
    </property>
-   <property name="toolTip">
-    <string>Set temperature</string>
+  </action>
+  <action name="actionLoad_temp_profile">
+   <property name="text">
+    <string>Load temp profile</string>
    </property>
   </action>
  </widget>
@@ -177,22 +304,6 @@
  <resources/>
  <connections>
   <connection>
-   <sender>toolBar</sender>
-   <signal>actionTriggered(QAction*)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>setTargetTempEvent()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>58</x>
-     <y>37</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>21</x>
-     <y>54</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>targetTempLineEdit</sender>
    <signal>editingFinished()</signal>
    <receiver>MainWindow</receiver>
@@ -208,8 +319,109 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>newTempButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>newTargetTempEvent()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>621</x>
+     <y>102</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>566</x>
+     <y>72</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>removeTempButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>removeTargetTempEvent()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>709</x>
+     <y>114</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>572</x>
+     <y>135</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>runTempProfileButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>targetTempLineEdit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>151</x>
+     <y>85</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>108</x>
+     <y>85</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>runTempProfileButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>runTempProfileToggledEvent(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>277</x>
+     <y>81</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>351</x>
+     <y>86</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLoad_temp_profile</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>loadTempProfileEvent()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>400</x>
+     <y>247</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave_temp_profile</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveTempProfileEvent()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>400</x>
+     <y>247</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>setTargetTempEvent()</slot>
+  <slot>newTargetTempEvent()</slot>
+  <slot>removeTargetTempEvent()</slot>
+  <slot>runTempProfileToggledEvent(bool)</slot>
+  <slot>saveTempProfileEvent()</slot>
+  <slot>loadTempProfileEvent()</slot>
  </slots>
 </ui>
