@@ -270,19 +270,22 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionSet_temp"/>
+   <addaction name="actionSave_temp_profile"/>
+   <addaction name="actionLoad_temp_profile"/>
   </widget>
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
    </property>
   </action>
-  <action name="actionSet_temp">
+  <action name="actionSave_temp_profile">
    <property name="text">
-    <string>Set temp</string>
+    <string>Save temp profile</string>
    </property>
-   <property name="toolTip">
-    <string>Set temperature</string>
+  </action>
+  <action name="actionLoad_temp_profile">
+   <property name="text">
+    <string>Load temp profile</string>
    </property>
   </action>
  </widget>
@@ -300,22 +303,6 @@
  </customwidgets>
  <resources/>
  <connections>
-  <connection>
-   <sender>toolBar</sender>
-   <signal>actionTriggered(QAction*)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>setTargetTempEvent()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>58</x>
-     <y>37</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>21</x>
-     <y>54</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>targetTempLineEdit</sender>
    <signal>editingFinished()</signal>
@@ -396,11 +383,45 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionLoad_temp_profile</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>loadTempProfileEvent()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>400</x>
+     <y>247</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave_temp_profile</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveTempProfileEvent()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>400</x>
+     <y>247</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>setTargetTempEvent()</slot>
   <slot>newTargetTempEvent()</slot>
   <slot>removeTargetTempEvent()</slot>
   <slot>runTempProfileToggledEvent(bool)</slot>
+  <slot>saveTempProfileEvent()</slot>
+  <slot>loadTempProfileEvent()</slot>
  </slots>
 </ui>

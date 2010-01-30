@@ -7,6 +7,8 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.Qwt5 import *
 
+import cPickle as pickle
+
 from pybrewMainWindow import MainWindow
 
 from brewcontroller import BrewController, BrewControllerException
@@ -110,10 +112,14 @@ class TargetTempProfileModel(QAbstractTableModel):
             return QVariant(self.headerdata[col])
         return QVariant()
     
-    def insertRows(self, row, count = 1, parent = QModelIndex()):
+    def insertRows(self, row, count = 1, parent = QModelIndex(), data = None):
+        if data != None:
+            count = len(data)
+        else:
+            data = [[0, 0] for i in range(count)]
         self.beginInsertRows(parent, row, row+count-1)
         for i in range(count):
-            self.tempdata.insert(row, [None, None])
+            self.tempdata.insert(row+i, data[i])
         self.endInsertRows()
         self.layoutChanged.emit()
         return True
@@ -261,6 +267,23 @@ class Pybrew(MainWindow):
 
     def tempUpdateEvent(self):
         self.bc.get_temp("0")
+
+    def saveTempProfileEvent(self):
+        filename = QFileDialog.getSaveFileName(self, "Save file", ".", "Temp profile (*.tpr)")
+        filename = str(filename)
+        if not filename.endswith(".tpr"):
+            filename += ".tpr"        
+        pickle.dump(self.targetTempProfileModel.tempdata, open(filename, 'w'))
+    
+    def loadTempProfileEvent(self):
+        filename = QFileDialog.getOpenFileName(self, "Open file", ".", "Temp profile (*.tpr)")
+        filename = str(filename)
+        if not filename:
+            return
+        data = pickle.load(open(filename, 'r'))
+        self.targetTempProfileModel.removeRows(0, self.targetTempProfileModel.rowCount())
+        self.targetTempProfileModel.insertRows(0, data = data)
+        self.tempProfileTableView.resizeRowsToContents()
 
     def set_target_temp(self, temp):
         print "Setting target temp to", temp
