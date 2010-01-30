@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
-import serial
+import sys, time
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -51,16 +50,19 @@ class Pybrew(MainWindow):
             
         self.tempCurve = QwtPlotCurve("Temperature")
         self.tempCurve.attach(self.tempQwtPlot)
+        self.targetCurve = QwtPlotCurve("Target temperature")
+        self.targetCurve.attach(self.tempQwtPlot)
         
         self.tempXData = []
         self.tempYData = []
-        
-        self.Thermo.setAlarmLevel(25)
-        self.Thermo.setAlarmColor(Qt.green)
+        self.targetXData = []
+        self.targetYData = []
 
         self.tempUpdateTimer = QTimer(self)
         self.connect(self.tempUpdateTimer, SIGNAL('timeout()'), self.tempUpdateEvent)
         self.tempUpdateTimer.start(self.tempUpdateInterval)
+        
+        self.start_time = time.time()
         
         self.read_serial_state()
 
@@ -75,18 +77,26 @@ class Pybrew(MainWindow):
 
     def serialGetTempEvent(self, sensor, temp):
         print "got temp", sensor, temp
-        
+        now = time.time()
         self.Thermo.setValue(temp)
-        if not self.tempXData:
-            self.tempXData = [0]
-        else:
-            self.tempXData.append(self.tempXData[-1] + self.tempUpdateInterval/1000.0)
+        self.tempXData.append(now - self.start_time)
         self.tempYData.append(int(temp))
+        self.targetXData[-1] = now - self.start_time
         self.tempCurve.setData(self.tempXData, self.tempYData)
+        self.targetCurve.setData(self.targetXData, self.targetYData)
         self.tempQwtPlot.replot()
     
     def serialGetTargetTempEvent(self, temp):
-        print "got target temp", temp
+        print "got target temp", repr(temp), "old", repr(self.target_temp)
+        now = time.time()
+        temp = int(temp)
+        for i in range(2):
+            self.targetXData.append(now - self.start_time)
+            self.targetYData.append(temp)
+        self.target_temp = temp
+        self.targetCurve.setData(self.targetXData, self.targetYData)
+        self.tempQwtPlot.replot()
+        
         self.targetTempLineEdit.setText(str(temp))
     
     def serialGetValveStateEvent(self, valve_id, state):
@@ -98,7 +108,7 @@ class Pybrew(MainWindow):
         elif state == "closed":
             is_open = False
         else:
-            print "Bad valve state", valve, state
+            print "Bad valve state", valve_id, state
             return
         button = self.valve_buttons[valve_id]
         button.setChecked(is_open)
@@ -112,8 +122,13 @@ class Pybrew(MainWindow):
 
     def setTargetTempEvent(self):
         temp = self.targetTempLineEdit.text()
+        try:
+            temp = int(temp)
+        except ValueError:
+            print "Bad temp value entered:", str(temp)
+            self.targetTempLineEdit.setText(str(self.target_temp))
+            return    
         self.set_target_temp(temp)
-        self.bc.get_target_temp() # read back the setting to verify
     
     def tempUpdateEvent(self):
         self.bc.get_temp("0")
@@ -126,8 +141,8 @@ class Pybrew(MainWindow):
             return
         if temp == self.target_temp:
             return
-        temp = self.bc.set_temp(temp)
-        self.target_temp = temp
+        self.bc.set_target_temp(temp)
+        self.bc.get_target_temp() # read back the setting to verify
 
     def valve_button_clicked(self, valve_id, button):
         self.bc.set_valve_open(valve_id, button.isChecked())
@@ -144,6 +159,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-app = App(0)
-app.MainLoop()

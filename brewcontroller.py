@@ -25,7 +25,7 @@ class FakeSerial:
         self.target_temp = "40\n"
         self.lines = []
     def readlines(self):
-        time.sleep(1)
+        time.sleep(0.3)
         r = self.lines
         self.lines = []
         return r
@@ -96,7 +96,11 @@ class BrewController(QThread):
                 self._mutex.lock()
                 cmd = self._cmd_queue.pop(0)
                 self._mutex.unlock()
-                self.__send_serial(cmd)
+                try:
+                    self.__send_serial(cmd)
+                except Exception, e:
+                    print e
+                    self.serialErrorSignal.emit(str(e))
             if self.terminate:
                 return
 
@@ -207,7 +211,7 @@ class BrewController(QThread):
             raise BrewControllerException("Valve " + str(valve) + " does not exist.")
         self._push_cmd("GV " + str(valve))
 
-    def set_temp(self, temp):
+    def set_target_temp(self, temp):
         """Sets target temperature to temp and returns the actual
            target temperature from the controller."""
         try:
