@@ -11,6 +11,65 @@ from pybrewMainWindow import MainWindow
 
 from brewcontroller import BrewController, BrewControllerException
 
+class TempCurve(QwtPlotCurve):
+    def __init__(self, name, startTime):
+        QwtPlotCurve.__init__(self, name)
+        self.startTime = startTime
+        self.xData = []
+        self.yData = []
+
+    def add_temp(self, temp, when = None):
+        if when == None:
+            when = time.time()
+        self.xData.append(when - self.startTime)
+        self.yData.append(temp)
+        self.setData(self.xData, self.yData)
+
+    def set_last_time(self, when):
+        try:
+            self.xData[-1] = when - self.startTime
+        except IndexError:
+            return # we don't have any data. ignore
+        self.setData(self.xData, self.yData)
+
+class TempPlot:
+    def __init__(self, qwt_plot):
+        self.start_time = time.time()
+        self.qwt_plot = qwt_plot
+        
+        self.tempCurve = TempCurve("Temperature", self.start_time)
+        #sym = self.tempCurve.symbol()
+        #sym.setStyle(QwtSymbol.Ellipse)
+        #sym.setSize(QSize(7, 7))
+        #self.tempCurve.setSymbol(sym)
+        pen = self.tempCurve.pen()
+        pen.setColor(Qt.blue)
+        pen.setWidth(2)
+        self.tempCurve.setPen(pen)
+        self.tempCurve.attach(self.qwt_plot)
+        
+        self.targetCurve = TempCurve("Target temperature", self.start_time)
+        self.targetCurve.setStyle(QwtPlotCurve.Steps) # make it look like a step function
+        pen = self.targetCurve.pen()
+        pen.setWidth(2)
+        pen.setColor(Qt.darkGreen)
+        self.targetCurve.setPen(pen)
+        self.targetCurve.attach(self.qwt_plot)
+    
+    def add_target_temp(self, temp):
+        now = time.time()
+        self.targetCurve.add_temp(temp, now)
+        # extra data point wich is moved forward in time in add_temp()
+        self.targetCurve.add_temp(temp, now)
+        self.qwt_plot.replot()
+
+    def add_temp(self, temp):
+        now = time.time()
+        self.tempCurve.add_temp(temp, now)
+        self.targetCurve.set_last_time(now)
+        self.qwt_plot.replot()
+    
+
 class Pybrew(MainWindow):
     def __init__(self):
         MainWindow.__init__(self)
@@ -47,23 +106,13 @@ class Pybrew(MainWindow):
             v.setCheckable(True)
             self.valveButtonLayout.addWidget(v)
             self.valve_buttons[k] = v
-            
-        self.tempCurve = QwtPlotCurve("Temperature")
-        self.tempCurve.attach(self.tempQwtPlot)
-        self.targetCurve = QwtPlotCurve("Target temperature")
-        self.targetCurve.attach(self.tempQwtPlot)
-        
-        self.tempXData = []
-        self.tempYData = []
-        self.targetXData = []
-        self.targetYData = []
+
+        self.tempPlot = TempPlot(self.tempQwtPlot)
 
         self.tempUpdateTimer = QTimer(self)
         self.connect(self.tempUpdateTimer, SIGNAL('timeout()'), self.tempUpdateEvent)
         self.tempUpdateTimer.start(self.tempUpdateInterval)
-        
-        self.start_time = time.time()
-        
+
         self.read_serial_state()
 
     def read_serial_state(self):
@@ -77,26 +126,14 @@ class Pybrew(MainWindow):
 
     def serialGetTempEvent(self, sensor, temp):
         print "got temp", sensor, temp
-        now = time.time()
         self.Thermo.setValue(temp)
-        self.tempXData.append(now - self.start_time)
-        self.tempYData.append(int(temp))
-        self.targetXData[-1] = now - self.start_time
-        self.tempCurve.setData(self.tempXData, self.tempYData)
-        self.targetCurve.setData(self.targetXData, self.targetYData)
-        self.tempQwtPlot.replot()
+        self.tempPlot.add_temp(temp)
     
     def serialGetTargetTempEvent(self, temp):
         print "got target temp", repr(temp), "old", repr(self.target_temp)
-        now = time.time()
         temp = int(temp)
-        for i in range(2):
-            self.targetXData.append(now - self.start_time)
-            self.targetYData.append(temp)
-        self.target_temp = temp
-        self.targetCurve.setData(self.targetXData, self.targetYData)
-        self.tempQwtPlot.replot()
-        
+        self.tempPlot.add_target_temp(temp)
+        self.target_temp = temp        
         self.targetTempLineEdit.setText(str(temp))
     
     def serialGetValveStateEvent(self, valve_id, state):
