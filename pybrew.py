@@ -69,7 +69,56 @@ class TempPlot:
         self.targetCurve.set_last_time(now)
         self.qwt_plot.replot()
     
+class TargetTempProfileModel(QAbstractTableModel):
+    def __init__(self, headers, parent = None):
+        QAbstractTableModel.__init__(self, parent)
+        
+        self.headerdata = headers
+        self.tempdata = []
+    
+    def rowCount(self, parent):
+        if not parent.isValid():
+            return len(self.tempdata)
+        return 0
+    
+    def columnCount(self, parent):
+        if not parent.isValid():
+            return 2
+        return 0
+    
+    def flags(self, index):
+        return Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled
 
+    def data(self, index, role):
+        if index.isValid() and (role == Qt.DisplayRole or role == Qt.EditRole):
+            return QVariant(self.tempdata[index.row()][index.column()])
+        return QVariant()
+    
+    def setData(self, index, data, role = Qt.EditRole):
+        self.tempdata[index.row()][index.column()] = data.toPyObject()
+        self.dataChanged.emit(index, index)
+        return True
+    
+    def headerData(self, col, orientation, role):
+        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+            return QVariant(self.headerdata[col])
+        return QVariant()
+    
+    def insertRows(self, row, count = 1, parent = QModelIndex()):
+        self.beginInsertRows(parent, row, row+count-1)
+        for i in range(count):
+            self.tempdata.insert(row, [None, None])
+        self.endInsertRows()
+        self.layoutChanged.emit()
+        return True
+    
+    def removeRows(self, row, count = 1, parent = QModelIndex()):
+        self.beginRemoveRows(parent, row, row+count-1)
+        for i in range(count):
+            del self.tempdata[row]
+        self.endRemoveRows()
+        return True
+        
 class Pybrew(MainWindow):
     def __init__(self):
         MainWindow.__init__(self)
@@ -109,6 +158,9 @@ class Pybrew(MainWindow):
 
         self.tempPlot = TempPlot(self.tempQwtPlot)
 
+        self.targetTempProfileModel = TargetTempProfileModel(["Temp", "Time"], parent = self)
+        self.tempProfileTableView.setModel(self.targetTempProfileModel)
+        
         self.tempUpdateTimer = QTimer(self)
         self.connect(self.tempUpdateTimer, SIGNAL('timeout()'), self.tempUpdateEvent)
         self.tempUpdateTimer.start(self.tempUpdateInterval)
@@ -157,6 +209,11 @@ class Pybrew(MainWindow):
         pal.setColor(button.backgroundRole(), color)
         button.setPalette(pal)
 
+    def newTargetTempEvent(self):
+        row = self.tempProfileTableView.currentIndex().row()
+        self.targetTempProfileModel.insertRows(row)
+        self.tempProfileTableView.resizeRowsToContents()
+
     def setTargetTempEvent(self):
         temp = self.targetTempLineEdit.text()
         try:
@@ -166,6 +223,9 @@ class Pybrew(MainWindow):
             self.targetTempLineEdit.setText(str(self.target_temp))
             return    
         self.set_target_temp(temp)
+    
+    def removeTargetTempEvent(self):
+        self.targetTempProfileModel.removeRows(self.tempProfileTableView.currentIndex().row())
     
     def tempUpdateEvent(self):
         self.bc.get_temp("0")
