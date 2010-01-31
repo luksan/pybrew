@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys, time
+import sys, time, csv
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -70,6 +70,19 @@ class TempPlot:
         self.tempCurve.add_temp(temp, now)
         self.targetCurve.set_last_time(now)
         self.qwt_plot.replot()
+    
+    def getTempData(self):
+        ret = []
+        target_index = 0 
+        for i in range(len(self.tempCurve.xData)):
+            if target_index+1 < len(self.targetCurve.xData):
+                if self.targetCurve.xData[target_index+1] < self.tempCurve.xData[i]:
+                    target_index += 1
+            ret.append( (self.tempCurve.xData[i],
+                         self.tempCurve.yData[i],
+                         self.targetCurve.yData[target_index]) )
+        return ret
+            
     
 class TargetTempProfileModel(QAbstractTableModel):
     def __init__(self, parent = None):
@@ -271,6 +284,8 @@ class Pybrew(MainWindow):
     def saveTempProfileEvent(self):
         filename = QFileDialog.getSaveFileName(self, "Save file", ".", "Temp profile (*.tpr)")
         filename = str(filename)
+        if not filename:
+            return
         if not filename.endswith(".tpr"):
             filename += ".tpr"        
         pickle.dump(self.targetTempProfileModel.tempdata, open(filename, 'w'))
@@ -284,6 +299,16 @@ class Pybrew(MainWindow):
         self.targetTempProfileModel.removeRows(0, self.targetTempProfileModel.rowCount())
         self.targetTempProfileModel.insertRows(0, data = data)
         self.tempProfileTableView.resizeRowsToContents()
+    
+    def saveTempDataEvent(self):
+        filename = QFileDialog.getSaveFileName(self, "Save file", ".", "Temp data (*.csv)")
+        filename = str(filename)
+        if not filename:
+            return
+        if not filename.endswith(".csv"):
+            filename += ".csv"        
+        c = csv.writer(open(filename, 'w'))
+        c.writerows(self.tempPlot.getTempData())
 
     def set_target_temp(self, temp):
         print "Setting target temp to", temp

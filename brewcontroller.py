@@ -46,7 +46,7 @@ class FakeSerial:
             self.delta = max((self.target_temp - self.temp)/3.0, 0.5)
         if s == "GT 0\n":
             if self.temp < self.target_temp:
-                self.temp = int(self.temp + self.delta)
+                self.temp = int(round(self.temp + self.delta))
             self.lines.append("%i\n" % self.temp)
         elif s.startswith("GV"):
             self.lines.append("0\n")
