@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'pybrewMainWindow.ui'
 #
-# Created: Sun Jan 31 00:33:27 2010
+# Created: Sun Jan 31 12:53:25 2010
 #      by: PyQt4 UI code generator 4.5.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -128,8 +128,11 @@ class Ui_MainWindow(object):
         self.actionSave_temp_profile.setObjectName("actionSave_temp_profile")
         self.actionLoad_temp_profile = QtGui.QAction(MainWindow)
         self.actionLoad_temp_profile.setObjectName("actionLoad_temp_profile")
+        self.actionSave_temp_data = QtGui.QAction(MainWindow)
+        self.actionSave_temp_data.setObjectName("actionSave_temp_data")
         self.menuFile.addAction(self.actionExit)
         self.menubar.addAction(self.menuFile.menuAction())
+        self.toolBar.addAction(self.actionSave_temp_data)
         self.toolBar.addAction(self.actionSave_temp_profile)
         self.toolBar.addAction(self.actionLoad_temp_profile)
         self.label.setBuddy(self.targetTempLineEdit)
@@ -142,6 +145,7 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.runTempProfileButton, QtCore.SIGNAL("toggled(bool)"), MainWindow.runTempProfileToggledEvent)
         QtCore.QObject.connect(self.actionLoad_temp_profile, QtCore.SIGNAL("activated()"), MainWindow.loadTempProfileEvent)
         QtCore.QObject.connect(self.actionSave_temp_profile, QtCore.SIGNAL("activated()"), MainWindow.saveTempProfileEvent)
+        QtCore.QObject.connect(self.actionSave_temp_data, QtCore.SIGNAL("activated()"), MainWindow.saveTempDataEvent)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -157,6 +161,7 @@ class Ui_MainWindow(object):
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSave_temp_profile.setText(QtGui.QApplication.translate("MainWindow", "Save temp profile", None, QtGui.QApplication.UnicodeUTF8))
         self.actionLoad_temp_profile.setText(QtGui.QApplication.translate("MainWindow", "Load temp profile", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionSave_temp_data.setText(QtGui.QApplication.translate("MainWindow", "Save temp data", None, QtGui.QApplication.UnicodeUTF8))
 
 from PyQt4 import Qwt5
 
