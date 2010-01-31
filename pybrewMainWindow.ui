@@ -270,6 +270,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionSave_temp_data"/>
    <addaction name="actionSave_temp_profile"/>
    <addaction name="actionLoad_temp_profile"/>
   </widget>
@@ -286,6 +287,11 @@
   <action name="actionLoad_temp_profile">
    <property name="text">
     <string>Load temp profile</string>
+   </property>
+  </action>
+  <action name="actionSave_temp_data">
+   <property name="text">
+    <string>Save temp data</string>
    </property>
   </action>
  </widget>
@@ -415,6 +421,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionSave_temp_data</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveTempDataEvent()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>400</x>
+     <y>247</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>setTargetTempEvent()</slot>
@@ -423,5 +445,6 @@
   <slot>runTempProfileToggledEvent(bool)</slot>
   <slot>saveTempProfileEvent()</slot>
   <slot>loadTempProfileEvent()</slot>
+  <slot>saveTempDataEvent()</slot>
  </slots>
 </ui>
