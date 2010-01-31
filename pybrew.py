@@ -176,7 +176,7 @@ class Pybrew(MainWindow):
             return cb
 
         for k in buttons:
-            v = QPushButton(self.bc.VALVES[k], self)
+            v = QPushButton(unicode(self.bc.VALVES[k]), self)
             v.connect(v, SIGNAL('clicked()'), get_callback(k, v))
             v.setObjectName(k)
             v.setCheckable(True)

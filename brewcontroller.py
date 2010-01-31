@@ -77,10 +77,10 @@ class BrewController(QThread):
         self.port_name = None
         
         self.VALVES = {
-            '0': 'Utlopp',
-            '1': 'Varmvatten f. v. vxl.',
-            '2': 'V. vxl. in',
-            '3': 'Mesh out',
+            '0': u'Utlopp',
+            '1': u'Buffertvatten f. v. vxl.',
+            '2': u'V. vxl. inlopp',
+            '3': u'Mäsk ut',
             }
         
         self.start()
