@@ -230,6 +230,7 @@ class Pybrew(MainWindow):
         self.tempUpdateTimer.start(self.tempUpdateInterval)
 
         self.read_serial_state()
+        self.setWindowStatus("Ready")
 
     def read_serial_state(self):
         for b in self.valve_buttons:
@@ -252,14 +253,20 @@ class Pybrew(MainWindow):
             self.target_temp_time = time.time()
         # check if we have stayed at this temp long enough
         ttime = self.targetTempProfileModel.getCurrentTime() * 60
-        if time.time() - self.target_temp_time >= ttime:
+        curr_time = time.time() - self.target_temp_time
+        if curr_time >= ttime:
             self.target_temp_time = None
             if not self.targetTempProfileModel.goToNextRow():
                 # The temp profile is complete. Turn off heating
                 self.runTempProfileButton.setChecked(False)
                 self.set_target_temp(20)
-            else:
-                self.set_target_temp(self.targetTempProfileModel.getCurrentTemp())
+                return
+            self.set_target_temp(self.targetTempProfileModel.getCurrentTemp())
+            ttime = self.targetTempProfileModel.getCurrentTime() * 60
+        remaining_time = -1
+        if self.target_temp_time != None:
+            remaining_time = ttime - (time.time() - self.target_temp_time)
+        self.setRemainingTime(remaining_time)
     
     def serialGetTargetTempEvent(self, temp):
         print "got target temp", repr(temp), "old", repr(self.target_temp)
@@ -312,8 +319,10 @@ class Pybrew(MainWindow):
         if toggled:
             self.targetTempProfileModel.setCurrentRow(0)
             self.set_target_temp(self.targetTempProfileModel.getCurrentTemp())
+            self.setRemainingTime(-1)
         else:
             self.targetTempProfileModel.setCurrentRow(None)
+            self.setRemainingTime(None)
 
     def tempUpdateEvent(self):
         self.bc.get_temp("0")
@@ -359,6 +368,29 @@ class Pybrew(MainWindow):
         self.bc.set_target_temp(temp)
         self.bc.get_target_temp() # read back the setting to verify
 
+    def setRemainingTime(self, seconds):
+        """Shows an indication in the UI of how much time is remaining
+           in the current temp profile line."""
+        if seconds == -1:
+            # The target temp isn't reached yet
+            self.setWindowStatus(u"Target temperature not reached")
+        elif seconds == None:
+            # Temp profile is not running
+            self.setWindowStatus("Ready")
+        else:
+            msg = u"Time remaining at current temperature level:"
+            msg += u" %.1f min" % (seconds / 60)
+            self.setWindowStatus(msg)
+
+    def setWindowStatus(self, status_str):
+        try:
+            status_label = self.status_label
+        except AttributeError:
+            self.status_label = QLabel("")
+            status_label = self.status_label
+            self.statusBar().addWidget(status_label)
+        status_label.setText(unicode(status_str))
+        
     def valve_button_clicked(self, valve_id, button):
         self.bc.set_valve_open(valve_id, button.isChecked())
         self.bc.get_valve_state(valve_id)
