@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'pybrewMainWindow.ui'
 #
-# Created: Sun Jan 31 12:53:25 2010
-#      by: PyQt4 UI code generator 4.5.4
+# Created: Mon Feb  1 15:09:01 2010
+#      by: PyQt4 UI code generator 4.6.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -51,13 +51,12 @@ class Ui_MainWindow(object):
         self.tempQwtPlot.setObjectName("tempQwtPlot")
         self.horizontalLayout.addWidget(self.tempQwtPlot)
         self.Thermo = Qwt5.QwtThermo(self.centralwidget)
+        self.Thermo.setAlarmColor(QtGui.QColor(0, 170, 127))
         self.Thermo.setAlarmEnabled(True)
-        self.Thermo.setAlarmLevel(45.0)
         self.Thermo.setScalePosition(Qwt5.QwtThermo.RightScale)
-        self.Thermo.setFillColor(QtGui.QColor(170, 0, 0))
-        self.Thermo.setMaxValue(100.0)
-        self.Thermo.setMinValue(0.0)
-        self.Thermo.setProperty("value", QtCore.QVariant(23.0))
+        self.Thermo.setFillColor(QtGui.QColor(0, 0, 127))
+        self.Thermo.setMaxValue(80.0)
+        self.Thermo.setMinValue(20.0)
         self.Thermo.setObjectName("Thermo")
         self.horizontalLayout.addWidget(self.Thermo)
         self.verticalLayout.addLayout(self.horizontalLayout)
