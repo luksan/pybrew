@@ -274,6 +274,7 @@ class Pybrew(MainWindow):
         self.tempPlot.add_target_temp(temp)
         self.target_temp = temp        
         self.targetTempLineEdit.setText(str(temp))
+        self.Thermo.setAlarmLevel(temp)
     
     def serialGetValveStateEvent(self, valve_id, state):
         print "got valve state:", valve_id, state
