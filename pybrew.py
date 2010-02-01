@@ -23,13 +23,13 @@ class TempCurve(QwtPlotCurve):
     def add_temp(self, temp, when = None):
         if when == None:
             when = time.time()
-        self.xData.append(when - self.startTime)
+        self.xData.append((when - self.startTime)/60)
         self.yData.append(temp)
         self.setData(self.xData, self.yData)
 
     def set_last_time(self, when):
         try:
-            self.xData[-1] = when - self.startTime
+            self.xData[-1] = (when - self.startTime)/60
         except IndexError:
             return # we don't have any data. ignore
         self.setData(self.xData, self.yData)
@@ -88,7 +88,7 @@ class TargetTempProfileModel(QAbstractTableModel):
     def __init__(self, parent = None):
         QAbstractTableModel.__init__(self, parent)
         
-        self.headerdata = ["Temp", "Time"]
+        self.headerdata = [u"Temp [°C]", u"Time [min]"]
         self.tempdata = []
     
     def rowCount(self, parent = QModelIndex()):
@@ -214,7 +214,7 @@ class Pybrew(MainWindow):
         if self.target_temp_time == None:
             self.target_temp_time = time.time()
         # check if we have stayed at this temp long enough
-        ttime = self.targetTempProfileModel.getTime(self.target_profile_line)
+        ttime = self.targetTempProfileModel.getTime(self.target_profile_line) * 60
         if time.time() - self.target_temp_time >= ttime:
             self.target_profile_line += 1
             self.target_temp_time = None
