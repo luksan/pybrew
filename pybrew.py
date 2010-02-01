@@ -90,6 +90,7 @@ class TargetTempProfileModel(QAbstractTableModel):
         
         self.headerdata = [u"Temp [°C]", u"Time [min]"]
         self.tempdata = []
+        self.current_row = None
     
     def rowCount(self, parent = QModelIndex()):
         if not parent.isValid():
@@ -102,7 +103,14 @@ class TargetTempProfileModel(QAbstractTableModel):
         return 0
     
     def flags(self, index):
-        return Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled
+        if self.current_row == None or self.current_row < index.row():
+            return Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled
+        if self.current_row == index.row():
+            if index.column() == 0: # temp column
+                return Qt.ItemIsSelectable
+            if index.column() == 1: # time column
+                return Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled
+        return Qt.ItemIsSelectable
 
     def data(self, index, role):
         if index.isValid() and (role == Qt.DisplayRole or role == Qt.EditRole):
@@ -114,6 +122,35 @@ class TargetTempProfileModel(QAbstractTableModel):
 
     def getTime(self, row):
         return int(str(self.tempdata[row][1]))
+
+    def getCurrentTemp(self):
+        if self.current_row == None:
+            return None 
+        return self.getTemp(self.current_row)
+    
+    def getCurrentTime(self):
+        if self.current_row == None:
+            return None
+        return self.getTime(self.current_row)
+
+    def goToNextRow(self):
+        row = self.getCurrentRow()
+        if row == None:
+            self.setCurrentRow(0)
+            return True
+        row += 1
+        if row >= len(self.tempdata):
+            self.setCurrentRow(None)
+            return False
+        self.setCurrentRow(row)
+        return True
+
+    def setCurrentRow(self, row):
+        self.current_row = row
+        self.layoutChanged.emit()
+
+    def getCurrentRow(self):
+        return self.current_row
 
     def setData(self, index, data, role = Qt.EditRole):
         self.tempdata[index.row()][index.column()] = int(str(data.toPyObject()))
@@ -152,7 +189,7 @@ class Pybrew(MainWindow):
         
         self.target_temp = 0
         self.target_temp_time = None # The time when the target temp was reached
-        self.target_profile_line = None # The current line in progress in the temp profile
+        self.temp_profile_is_running = False
 
         try:
             self.bc = BrewController()
@@ -207,23 +244,22 @@ class Pybrew(MainWindow):
         #print "got temp", sensor, temp
         self.Thermo.setValue(temp)
         self.tempPlot.add_temp(temp)
-        if temp >= self.target_temp and self.target_profile_line != None:
+        if temp >= self.target_temp and self.temp_profile_is_running:
             self.check_temp_profile()
 
     def check_temp_profile(self):
         if self.target_temp_time == None:
             self.target_temp_time = time.time()
         # check if we have stayed at this temp long enough
-        ttime = self.targetTempProfileModel.getTime(self.target_profile_line) * 60
+        ttime = self.targetTempProfileModel.getCurrentTime() * 60
         if time.time() - self.target_temp_time >= ttime:
-            self.target_profile_line += 1
             self.target_temp_time = None
-            if self.target_profile_line >= self.targetTempProfileModel.rowCount():
+            if not self.targetTempProfileModel.goToNextRow():
                 # The temp profile is complete. Turn off heating
                 self.runTempProfileButton.setChecked(False)
                 self.set_target_temp(20)
             else:
-                self.set_target_temp(self.targetTempProfileModel.getTemp(self.target_profile_line))            
+                self.set_target_temp(self.targetTempProfileModel.getCurrentTemp())
     
     def serialGetTargetTempEvent(self, temp):
         print "got target temp", repr(temp), "old", repr(self.target_temp)
@@ -272,11 +308,12 @@ class Pybrew(MainWindow):
         self.targetTempProfileModel.removeRows(self.tempProfileTableView.currentIndex().row())
     
     def runTempProfileToggledEvent(self, toggled):
+        self.temp_profile_is_running = toggled
         if toggled:
-            self.target_profile_line = 0
-            self.set_target_temp(self.targetTempProfileModel.getTemp(0))
+            self.targetTempProfileModel.setCurrentRow(0)
+            self.set_target_temp(self.targetTempProfileModel.getCurrentTemp())
         else:
-            self.target_profile_line = None            
+            self.targetTempProfileModel.setCurrentRow(None)
 
     def tempUpdateEvent(self):
         self.bc.get_temp("0")
