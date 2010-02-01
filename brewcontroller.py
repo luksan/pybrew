@@ -75,7 +75,8 @@ class BrewController(QThread):
         self.sport = None
         self.serial_state = SERIAL_STATE_INIT
         self.port_name = None
-        
+        self._do_init = False
+
         self.VALVES = {
             '0': u'Utlopp',
             '1': u'Buffertvatten f. v. vxl.',
