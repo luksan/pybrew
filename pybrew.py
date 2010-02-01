@@ -57,6 +57,12 @@ class TempPlot:
         pen.setColor(Qt.darkGreen)
         self.targetCurve.setPen(pen)
         self.targetCurve.attach(self.qwt_plot)
+        
+        self.qwt_plot.setAxisScale(self.qwt_plot.yLeft, 20, 80)
+        font = self.qwt_plot.axisFont(self.qwt_plot.yLeft)
+        font.setPointSize(8)
+        self.qwt_plot.setAxisFont(self.qwt_plot.yLeft, font)
+        self.qwt_plot.setAxisFont(self.qwt_plot.xBottom, font)
     
     def add_target_temp(self, temp):
         now = time.time()
