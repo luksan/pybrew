@@ -148,25 +148,24 @@ class BrewController(QThread):
             line = line + '\n'
         try:
             self.sport.write(line)
-            r = self.sport.readlines()
+            echo = self.sport.readline()
+            result = self.sport.readline()
         except OSError, e:
             #FIXME stop all further communication attempts
             print "Read/write failed:", e
             self.serial_state = SERIAL_STATE_ERROR
             return False
 
-        if len(r) != 2:
-            raise BrewControllerException("Didn't read 2 lines" + str(r))
         line = line.strip()
-        
-        echo = r[0].strip()
-        result = r[1].strip()
+
+        echo = echo.strip()
+        result = result.strip()
         if echo != line:
             raise BrewControllerException("Read error. Sent '" + line + 
                        "', received '" + result + "'")
         # print line,":", echo,":", result
         if result in ('NCK', 'NOK'):
-            raise BrewControllerException("Command failed." + line + ", " + str(r))
+            raise BrewControllerException("Command failed." + line + ", " + echo + ", " + result)
         
         self.__parse_result(echo, result)
 
