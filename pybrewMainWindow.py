@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'pybrewMainWindow.ui'
 #
-# Created: Mon Feb  1 15:09:01 2010
+# Created: Tue Feb  2 17:40:55 2010
 #      by: PyQt4 UI code generator 4.6.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -142,9 +142,9 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.removeTempButton, QtCore.SIGNAL("clicked()"), MainWindow.removeTargetTempEvent)
         QtCore.QObject.connect(self.runTempProfileButton, QtCore.SIGNAL("toggled(bool)"), self.targetTempLineEdit.setDisabled)
         QtCore.QObject.connect(self.runTempProfileButton, QtCore.SIGNAL("toggled(bool)"), MainWindow.runTempProfileToggledEvent)
-        QtCore.QObject.connect(self.actionLoad_temp_profile, QtCore.SIGNAL("activated()"), MainWindow.loadTempProfileEvent)
-        QtCore.QObject.connect(self.actionSave_temp_profile, QtCore.SIGNAL("activated()"), MainWindow.saveTempProfileEvent)
-        QtCore.QObject.connect(self.actionSave_temp_data, QtCore.SIGNAL("activated()"), MainWindow.saveTempDataEvent)
+        QtCore.QObject.connect(self.actionLoad_temp_profile, QtCore.SIGNAL("triggered()"), MainWindow.loadTempProfileEvent)
+        QtCore.QObject.connect(self.actionSave_temp_profile, QtCore.SIGNAL("triggered()"), MainWindow.saveTempProfileEvent)
+        QtCore.QObject.connect(self.actionSave_temp_data, QtCore.SIGNAL("triggered()"), MainWindow.saveTempDataEvent)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
