@@ -46,7 +46,7 @@ class FakeSerial:
             self.delta = max((self.target_temp - self.temp)/3.0, 0.5)
         if s == "GT 0\n":
             if self.temp < self.target_temp:
-                self.temp = int(round(self.temp + self.delta))
+                self.temp = self.temp + self.delta
             self.lines.append("%i\n" % self.temp)
         elif s.startswith("GV"):
             self.lines.append("0\n")
@@ -59,8 +59,8 @@ class FakeSerial:
 class BrewController(QThread):
     serialErrorSignal = pyqtSignal(str)
     
-    getTempSignal = pyqtSignal(str, int)
-    getTargetTempSignal = pyqtSignal(int)
+    getTempSignal = pyqtSignal(str, float)
+    getTargetTempSignal = pyqtSignal(float)
     getValveStateSignal = pyqtSignal(str, str)
 
     def __init__(self):
@@ -186,7 +186,7 @@ class BrewController(QThread):
                 return
         elif cmd == "GT": # read temp sensor
             try:
-                result = int(result)
+                result = float(result)
             except:
                 pass
             else:
@@ -196,7 +196,7 @@ class BrewController(QThread):
         elif cmd == "GR": # get regulator target temperature
             if len(c) == 0:
                 try:
-                    result = int(result)
+                    result = float(result)
                 except:
                     pass
                 else:
