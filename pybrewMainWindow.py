@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'pybrewMainWindow.ui'
 #
-# Created: Tue Feb  2 17:40:55 2010
-#      by: PyQt4 UI code generator 4.6.2
+# Created: Mon Apr  5 21:47:10 2010
+#      by: PyQt4 UI code generator 4.7
 #
 # WARNING! All changes made in this file will be lost!
 
